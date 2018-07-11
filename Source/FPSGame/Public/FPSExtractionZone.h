@@ -18,9 +18,10 @@ public:
 	AFPSExtractionZone();
 
 protected:
+	virtual void BeginPlay() override;
+
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UBoxComponent* OverlapComp;
-
 	
 public:
 	UFUNCTION()
