@@ -3,7 +3,10 @@
 #include "FPSExtractionZone.h"
 #include "Components/BoxComponent.h"
 #include "UnrealEngine.h"
-
+#include "Components/DecalComponent.h"
+#include "FPSGameMode.h"
+#include "FPSCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AFPSExtractionZone::AFPSExtractionZone()
@@ -16,12 +19,29 @@ AFPSExtractionZone::AFPSExtractionZone()
 	OverlapComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	OverlapComp->SetBoxExtent(FVector(200.0));
 	RootComponent = OverlapComp;
+
+	DecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("DecalComp"));
+	DecalComp->SetupAttachment(RootComponent);
+	DecalComp->DecalSize = FVector(200.0f);
 }
 
 void AFPSExtractionZone::HandleOverlap(class UPrimitiveComponent *OverlappedComponent, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Green, TEXT("CUCKED"));
-	UE_LOG(LogTemp, Log, TEXT("Something entered the extraction zone..."));
+	AFPSGameMode *GM = Cast<AFPSGameMode>( GetWorld()->GetAuthGameMode() );
+	AFPSCharacter *character = Cast<AFPSCharacter>(OtherActor);
+	if (!GM || !character)
+	{
+		return;
+	}
+
+	if (character->isCarryingObjective)
+	{
+		GM->CompleteMission(character);
+	}
+	else
+	{
+		UGameplayStatics::PlaySound2D(this, NoObjectiveSound);
+	}
 }
 
 void AFPSExtractionZone::BeginPlay()
