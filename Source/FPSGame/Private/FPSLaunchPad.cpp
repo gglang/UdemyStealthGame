@@ -6,6 +6,7 @@
 #include "FPSCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/DecalComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AFPSLaunchPad::AFPSLaunchPad()
@@ -24,10 +25,8 @@ AFPSLaunchPad::AFPSLaunchPad()
 	BoxTriggerComp->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Overlap);
 	BoxTriggerComp->SetupAttachment(RootComponent);
 
-	DecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("DecalComp"));
-	DecalComp->SetupAttachment(RootComponent);
-
 	LaunchSpeed = 100.0f;
+	LaunchPitch = 45.0f;
 }
 
 // Called when the game starts or when spawned
@@ -43,23 +42,23 @@ void AFPSLaunchPad::HandleOverlap(class UPrimitiveComponent *OverlappedComponent
 {
 	UE_LOG(LogTemp, Warning, TEXT("Handling Overlap"));
 
-	FVector launchVelocity = GetActorForwardVector() + FVector(0.0f, 0.0f, 2.0f);
-	launchVelocity.Normalize();
-	launchVelocity *= LaunchSpeed;
+	FRotator launchDirection = GetActorRotation();
+	launchDirection.Pitch += LaunchPitch;
+	FVector launchVelocity = launchDirection.Vector() * LaunchSpeed;
 
 	AFPSCharacter *playerCharacter = Cast<AFPSCharacter>(OtherActor);
 	if (playerCharacter)
 	{
 		playerCharacter->LaunchCharacter(launchVelocity, true, true);
 		UE_LOG(LogTemp, Warning, TEXT("Launching character at: %s"), *launchVelocity.ToString());
+
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LaunchParticleSystem, GetActorTransform());
 	}
-	else
+	else if (OverlappedComponent && OverlappedComponent->IsSimulatingPhysics())
 	{
-		UStaticMeshComponent *physicsBody = Cast<UStaticMeshComponent>(OtherActor->GetRootComponent());
-		if (physicsBody)
-		{
-			physicsBody->AddImpulse(launchVelocity, NAME_None, true);
-			UE_LOG(LogTemp, Warning, TEXT("Launching NON character at: %s"), *launchVelocity.ToString());
-		}
+		OverlappedComponent->AddImpulse(launchVelocity, NAME_None, true);
+		UE_LOG(LogTemp, Warning, TEXT("Launching NON character at: %s"), *launchVelocity.ToString());
+
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LaunchParticleSystem, GetActorTransform());
 	}
 }

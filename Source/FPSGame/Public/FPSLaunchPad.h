@@ -37,10 +37,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Parameters")
 	float LaunchSpeed;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Parameters")
+	float LaunchPitch;
+
 public:	
 	UFUNCTION()
 	void HandleOverlap(class UPrimitiveComponent *OverlappedComponent, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-
-// 	void NotifyActorBeginOverlap(AActor* OtherActor) override;
-
 };
