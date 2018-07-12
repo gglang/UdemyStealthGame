@@ -4,6 +4,7 @@
 #include "FPSHUD.h"
 #include "FPSCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 AFPSGameMode::AFPSGameMode()
 {
@@ -17,10 +18,30 @@ AFPSGameMode::AFPSGameMode()
 
 void AFPSGameMode::CompleteMission(APawn *InsigatorPawn)
 {
+	
 	if (InsigatorPawn)
 	{
 		InsigatorPawn->DisableInput(nullptr);
-	}
 
-	OnMissionCompleted();
+		if (SpectatingViewpointClass)
+		{
+			TArray<AActor *> NewSpectatingViewpoints;
+			UGameplayStatics::GetAllActorsOfClass(this, SpectatingViewpointClass, NewSpectatingViewpoints);
+
+			if (NewSpectatingViewpoints.Num() > 0)
+			{
+				APlayerController *PC = Cast<APlayerController>(InsigatorPawn->GetController());
+				if (PC)
+				{
+					PC->SetViewTargetWithBlend(NewSpectatingViewpoints[0], 0.5f, VTBlend_Cubic);
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Please set SpectatingViewpointClass on FPSGameMode, cannot change view target."));
+		}
+
+		OnMissionCompleted();
+	}
 }
