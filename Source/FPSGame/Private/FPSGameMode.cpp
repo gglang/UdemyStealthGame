@@ -16,12 +16,11 @@ AFPSGameMode::AFPSGameMode()
 	HUDClass = AFPSHUD::StaticClass();
 }
 
-void AFPSGameMode::CompleteMission(APawn *InsigatorPawn)
+void AFPSGameMode::CompleteMission(APawn *InstigatorPawn, bool MissionSuccess)
 {
-	
-	if (InsigatorPawn)
+	if (InstigatorPawn)
 	{
-		InsigatorPawn->DisableInput(nullptr);
+		InstigatorPawn->DisableInput(nullptr);
 
 		if (SpectatingViewpointClass)
 		{
@@ -30,7 +29,7 @@ void AFPSGameMode::CompleteMission(APawn *InsigatorPawn)
 
 			if (NewSpectatingViewpoints.Num() > 0)
 			{
-				APlayerController *PC = Cast<APlayerController>(InsigatorPawn->GetController());
+				APlayerController *PC = Cast<APlayerController>(InstigatorPawn->GetController());
 				if (PC)
 				{
 					PC->SetViewTargetWithBlend(NewSpectatingViewpoints[0], 0.5f, VTBlend_Cubic);
@@ -42,6 +41,6 @@ void AFPSGameMode::CompleteMission(APawn *InsigatorPawn)
 			UE_LOG(LogTemp, Warning, TEXT("Please set SpectatingViewpointClass on FPSGameMode, cannot change view target."));
 		}
 
-		OnMissionCompleted();
+		OnMissionCompleted(MissionSuccess);
 	}
 }

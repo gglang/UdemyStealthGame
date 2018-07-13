@@ -36,7 +36,7 @@ void AFPSExtractionZone::HandleOverlap(class UPrimitiveComponent *OverlappedComp
 
 	if (character->isCarryingObjective)
 	{
-		GM->CompleteMission(character);
+		GM->CompleteMission(character, true);
 	}
 	else
 	{

@@ -4,6 +4,8 @@
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "FPSCharacter.h"
+#include "FPSGameMode.h"
 
 // Sets default values
 AFPSAIGuard::AFPSAIGuard()
@@ -48,11 +50,13 @@ void AFPSAIGuard::HandlePawnSensed(APawn *SeenPawn)
 	GetWorldTimerManager().SetTimer(ResetRotationTimer, this, &AFPSAIGuard::ResetRotation, 3.0f);
 	
 	DrawDebugSphere(GetWorld(), SeenPawn->GetActorLocation(), 20.0f, 32, FColor::Red, false, 10.0f);
-}
 
-void AFPSAIGuard::ResetRotation()
-{
-	SetActorRotation(OriginalRotation);
+	AFPSCharacter *fpsCharacter = Cast<AFPSCharacter>(SeenPawn);
+	AFPSGameMode *GM = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
+	if (fpsCharacter && GM)
+	{
+		GM->CompleteMission(SeenPawn, false);
+	}
 }
 
 void AFPSAIGuard::HandleNoiseHeard(APawn* NoiseInstigator, const FVector &Location, float Volume)
@@ -68,4 +72,9 @@ void AFPSAIGuard::HandleNoiseHeard(APawn* NoiseInstigator, const FVector &Locati
 	GetWorldTimerManager().SetTimer(ResetRotationTimer, this, &AFPSAIGuard::ResetRotation, 3.0f);
 
 	DrawDebugSphere(GetWorld(), Location, 20.0f, 32, FColor::Blue, false, 10.0f);
+}
+
+void AFPSAIGuard::ResetRotation()
+{
+	SetActorRotation(OriginalRotation);
 }

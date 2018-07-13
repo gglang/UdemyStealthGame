@@ -15,10 +15,10 @@ public:
 
 	AFPSGameMode();
 
-	void CompleteMission(APawn *InsigatorPawn);
+	void CompleteMission(APawn *InsigatorPawn, bool MissionSuccess);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
-	void OnMissionCompleted();
+	void OnMissionCompleted(bool MissionSuccess);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Spectating")
 	TSubclassOf<AActor> SpectatingViewpointClass;

@@ -31,8 +31,6 @@ private:
 	FTimerHandle ResetRotationTimer;
 	FRotator OriginalRotation;
 
-
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
