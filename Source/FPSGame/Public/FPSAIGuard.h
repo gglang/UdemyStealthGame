@@ -24,10 +24,22 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent *PawnSensingComponent;
 
+	UFUNCTION()
+	void ResetRotation();
+
+private:
+	FTimerHandle ResetRotationTimer;
+	FRotator OriginalRotation;
+
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
 	void HandlePawnSensed(APawn *SeenPawn);
+
+	UFUNCTION()
+	void HandleNoiseHeard(APawn* NoiseInstigator, const FVector &Location, float Volume);
 };
