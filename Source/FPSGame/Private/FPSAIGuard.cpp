@@ -6,6 +6,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "FPSCharacter.h"
 #include "FPSGameMode.h"
+#include "AI/Navigation/NavigationSystem.h"
 
 // Sets default values
 AFPSAIGuard::AFPSAIGuard()
@@ -25,7 +26,11 @@ void AFPSAIGuard::BeginPlay()
 	
 	PawnSensingComponent->OnSeePawn.AddDynamic(this, &AFPSAIGuard::HandlePawnSensed);
 	PawnSensingComponent->OnHearNoise.AddDynamic(this, &AFPSAIGuard::HandleNoiseHeard);
-	UE_LOG(LogTemp, Warning, TEXT("DWARF READY"));
+
+	if (bPatrol)
+	{
+		MoveToNextPatrolPoint();
+	}
 }
 
 // Called every frame
@@ -33,11 +38,15 @@ void AFPSAIGuard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	float currDist = FVector::Distance(GetActorLocation(), currentPatrolPoint->GetTargetLocation());
+	if (currDist < 150.0f)
+	{
+		MoveToNextPatrolPoint();
+	}
 }
 
 void AFPSAIGuard::HandlePawnSensed(APawn *SeenPawn)
 {
-	UE_LOG(LogTemp, Warning, TEXT("DWARF FUCK SAW SOMETHING"));
 	if (!SeenPawn)
 	{
 		return;
@@ -59,14 +68,12 @@ void AFPSAIGuard::HandlePawnSensed(APawn *SeenPawn)
 	{
 		GM->CompleteMission(SeenPawn, false);
 	}
-
+	Controller->StopMovement();
 	ChangeAIState(EAIState::Alerted);
 }
 
 void AFPSAIGuard::HandleNoiseHeard(APawn* NoiseInstigator, const FVector &Location, float Volume)
 {
-	UE_LOG(LogTemp, Warning, TEXT("DWARF FUCK HEARD SOMETHING"));
-
 	FRotator NewLookAt = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Location);
 	NewLookAt.Pitch = 0.0f;
 	NewLookAt.Roll = 0.0f;
@@ -76,13 +83,18 @@ void AFPSAIGuard::HandleNoiseHeard(APawn* NoiseInstigator, const FVector &Locati
 	GetWorldTimerManager().SetTimer(ResetRotationTimer, this, &AFPSAIGuard::ResetRotation, 3.0f);
 
 	DrawDebugSphere(GetWorld(), Location, 20.0f, 32, FColor::Blue, false, 10.0f);
-	
+	Controller->StopMovement();
 	ChangeAIState(EAIState::Suspicious);
 }
 
 void AFPSAIGuard::ResetRotation()
 {
 	SetActorRotation(OriginalRotation);
+
+	if (bPatrol)
+	{
+		MoveToNextPatrolPoint();
+	}
 
 	ChangeAIState(EAIState::Idle);
 }
@@ -95,5 +107,20 @@ void AFPSAIGuard::ChangeAIState(EAIState newState)
 	}
 
 	aiState = newState;
+	
 	OnAIStateChange(newState);
+}
+
+void AFPSAIGuard::MoveToNextPatrolPoint()
+{
+	if (currentPatrolPoint == nullptr || currentPatrolPoint == secondPatrolPoint)
+	{
+		currentPatrolPoint = firstPatrolPoint;
+	}
+	else
+	{
+		currentPatrolPoint = secondPatrolPoint;
+	}
+
+	UNavigationSystem::SimpleMoveToActor(GetController(), currentPatrolPoint);
 }

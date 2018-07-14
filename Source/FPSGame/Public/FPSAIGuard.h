@@ -40,6 +40,19 @@ protected:
 
 	void ChangeAIState(EAIState newState);
 
+	UPROPERTY(EditInstanceOnly, Category = "AI")
+	bool bPatrol;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI", meta = (EditCondition = "bPatrol") )
+	AActor *firstPatrolPoint;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI", meta = (EditCondition = "bPatrol") )
+	AActor *secondPatrolPoint;
+
+	AActor *currentPatrolPoint;
+
+	void MoveToNextPatrolPoint();
+
 private:
 	FTimerHandle ResetRotationTimer;
 	FRotator OriginalRotation;
@@ -54,4 +67,5 @@ public:
 
 	UFUNCTION()
 	void HandleNoiseHeard(APawn* NoiseInstigator, const FVector &Location, float Volume);
+
 };
