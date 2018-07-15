@@ -54,7 +54,6 @@ void AFPSBlackHole::OnOverlapBegin(class UPrimitiveComponent *OverlappedComponen
 {
 	if (OtherActor)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, "YAAAAH TRICK YAAAAAAAH");
 		OtherActor->Destroy();
 	}
 }
