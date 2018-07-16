@@ -38,6 +38,16 @@ void AFPSAIGuard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!bPatrol)
+	{
+		return;
+	}
+
+	if (!currentPatrolPoint)
+	{
+		MoveToNextPatrolPoint();
+	}
+
 	float currDist = FVector::Distance(GetActorLocation(), currentPatrolPoint->GetTargetLocation());
 	if (currDist < 150.0f)
 	{
